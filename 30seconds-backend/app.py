@@ -60,8 +60,9 @@ INSURANCE_LINK = "https://heymondo.it/?utm_medium=Afiliado&utm_source=30SECONDST
 TRAIN_LINK = "https://clk.tradedoubler.com/click?a(3480952)p(376991)ttid(13)url(https://www.thetrainline.com/it/porta-un-amico?situation=td-it&utm_source=td-it)"
 GYG_LINK = "https://gyg.me/YAGbtbpK"
 HOTEL_LINK = "https://www.expedia.com"
+GUIDE_APP_URL = "https://www.30secondstoguide.it" 
 
-# --- TESTI E TRADUZIONI PDF ---
+# --- TESTI E TRADUZIONI PDF (UNIFICATO STANDARD + WIZARD) ---
 LANGUAGES = {
     "IT": {
         "label": "Pocket Guide",
@@ -71,7 +72,30 @@ LANGUAGES = {
         "insight": "Travel Insight",
         "must": "Non partire senza",
         "gen": "WWW.30SECONDSTOGUIDE.IT",
-        "footer_msg": "Questa guida è gratuita grazie ai nostri partner. Usando questi link supporti il nostro lavoro. Buon viaggio!"
+        "footer_msg": "Questa guida è gratuita grazie ai nostri partner. Usando questi link supporti il nostro lavoro. Buon viaggio!",
+        
+        # Nuove chiavi Itinerary Wizard
+        "months": {1: "Gennaio", 2: "Febbraio", 3: "Marzo", 4: "Aprile", 5: "Maggio", 6: "Giugno", 7: "Luglio", 8: "Agosto", 9: "Settembre", 10: "Ottobre", 11: "Novembre", 12: "Dicembre"},
+        "pax_adults": "Adulti",
+        "pax_kids": "Ragazzi",
+        "pdf_title": "Travel Plan Esclusivo",
+        "pdf_generated": "GENERATO CON www.30secondstoguide.it",
+        "pdf_promo": "Approfondisci la conoscenza delle città del tuo itinerario, crea le tue guide qui.",
+        "pdf_travellers": "Viaggiatori",
+        "pdf_date": "Date",
+        "pdf_budget_target": "Budget Target",
+        "key_chapter": "CAPITOLO",
+        "key_verdict": "VERDETTO",
+        "key_day": "GIORNO",
+        "ad_flight": "In {month} i prezzi aumentano? Inizia a monitorare ORA i migliori prezzi su Kiwi.com",
+        "ad_esim": "eSim Saily: Internet immediato all'arrivo senza acquisto di SIM locali. 5$ di sconto con codice FABIOI3455",
+        "ad_insur": "MAI senza Assicurazione Sanitaria: Clicca e sblocca il 10% DI SCONTO con Heymondo",
+        "ad_hotel": "Stanze in Hotel quasi esaurite in {month}? Prenota ora su Expedia",
+        "ad_transfer": "Transfer privati ad un prezzo WOW! da e per l'aeroporto",
+        "ad_tiqets": "Non rischiare il tutto esaurito a {dest}. Assicurati il posto e le migliori offerte su Tiqets",
+        "ad_car": "Viaggia in libertà e noleggia un auto: Tariffe esclusive con Sixt",
+        "ad_train": "Treni: Prenota su Trainline",
+        "ad_rest": "Esplora al miglior prezzo! Prenota su GetYourGuide"
     },
     "EN": {
         "label": "Pocket Guide",
@@ -81,11 +105,34 @@ LANGUAGES = {
         "insight": "Travel Insight",
         "must": "Must have",
         "gen": "WWW.30SECONDSTOGUIDE.IT",
-        "footer_msg": "This guide is free thanks to our partners. Using these links supports our work. Have a great trip!"
+        "footer_msg": "This guide is free thanks to our partners. Using these links supports our work. Have a great trip!",
+        
+        # Nuove chiavi Itinerary Wizard
+        "months": {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"},
+        "pax_adults": "Adults",
+        "pax_kids": "Teens/Kids",
+        "pdf_title": "Exclusive Travel Plan",
+        "pdf_generated": "GENERATED WITH www.30secondstoguide.it",
+        "pdf_promo": "Deepen your knowledge of the cities in your itinerary, create your guides here.",
+        "pdf_travellers": "Travelers",
+        "pdf_date": "Dates",
+        "pdf_budget_target": "Target Budget",
+        "key_chapter": "CHAPTER",
+        "key_verdict": "VERDICT",
+        "key_day": "DAY",
+        "ad_flight": "Prices rising in {month}? Book now on Kiwi.com",
+        "ad_esim": "eSim Saily: Instant internet on arrival without buying local SIMs",
+        "ad_insur": "NEVER without Health Insurance: Get 10% off HERE with Heymondo",
+        "ad_hotel": "Hotel rooms almost sold out in {month}? Book now on Expedia",
+        "ad_transfer": "Private transfers at WOW prices! to and from the airport",
+        "ad_tiqets": "Don't risk sold out in {dest}. Secure spots and best deals on Tiqets",
+        "ad_car": "Travel freely and rent a car: Exclusive rates with Sixt",
+        "ad_train": "Trains: Book on Trainline",
+        "ad_rest": "Discover at the best rate! Book on GetYourGuide"
     }
 }
 
-# --- MODELLI PROMPT ---
+# --- MODELLI PROMPT (GUIDA STANDARD) ---
 TESTO_MODELLO_IT = """
 # [NOME CITTÀ]: Guida Esclusiva
 
@@ -220,6 +267,9 @@ TESTO_MODELLO_EN = """
 [Final philosophical reflection on the trip to this city, describe the essence of the journey].
 """
 
+# ==========================================
+# FUNZIONI COMUNI
+# ==========================================
 def inject_gyg_links(text_line, dest_name):
     tour_matches = re.findall(r'\[TOUR:\s*(.*?)\]', text_line)
     for tour in tour_matches:
@@ -230,6 +280,10 @@ def inject_gyg_links(text_line, dest_name):
         text_line = text_line.replace(f"[TOUR: {tour}]", html_link)
     return text_line
 
+
+# ==========================================
+# 🧙‍♂️ PDF ENGINE (GUIDA STANDARD)
+# ==========================================
 def create_pdf(text, city, lang_code="IT"):
     city_clean = city.split(',')[0].strip()
     city_upper = city_clean.strip().upper()
@@ -492,7 +546,259 @@ def create_pdf(text, city, lang_code="IT"):
     return HTML(string=html_template).write_pdf()
 
 # ==========================================
-# ROTTA: /genera-standard
+# 🧙‍♂️ PDF ENGINE (ITINERARY WIZARD)
+# ==========================================
+def create_wizard_pdf(text, destination, meta_data, lang_code="IT"):
+    ui = LANGUAGES.get(lang_code, LANGUAGES["IT"])
+
+    def clean_text_for_pdf(text_input):
+        if not text_input: return ""
+        text_input = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text_input)
+        return text_input
+
+    city_clean = destination.split(',')[0].strip()
+    dest_clean = clean_text_for_pdf(city_clean)
+    month_clean = clean_text_for_pdf(meta_data.get('month_name', ''))
+
+    # Titolo Copertina
+    city_upper = dest_clean.strip().upper()
+    if len(city_upper) > 24:
+        city_upper = city_upper[:21] + "..."
+    if 12 < len(city_upper) <= 24 and " " in city_upper:
+        words = city_upper.split()
+        mid = len(words) // 2
+        line1, line2 = " ".join(words[:mid]), " ".join(words[mid:])
+        html_city = f"{line1}<br>{line2[:-1]}<span class='last-letter-dot'>{line2[-1]}.</span>"
+    else:
+        html_city = f"{city_upper[:-1]}<span class='last-letter-dot'>{city_upper[-1]}.</span>"
+
+    formatted_body = ""
+    lines = text.split('\n')
+    inserted_ch1 = inserted_ch2 = inserted_ch3 = inserted_ch4 = False
+
+    TRIGGER_CH = f"## {ui.get('key_chapter', 'CAPITOLO')}"
+    TRIGGER_VERDICT = ui.get('key_verdict', 'VERDETTO')
+
+    def make_html_box(link, cta, sub):
+        cta_html = f"{cta[:-1]}<span style='color: #1a1a1a;'>{cta[-1]}</span>"
+        return f"""
+        <div class="section-service-box">
+            <span class="service-tag">LINK UTILI PER IL TUO VIAGGIO</span>
+            <a href="{link}" target="_blank" class="service-cta">{cta_html}</a>
+            <div class="service-sub">{sub}</div>
+        </div>
+        """
+
+    for line in lines:
+        clean_line = clean_text_for_pdf(line.strip())
+        if not clean_line:
+            continue
+        
+        # Sostituzioni dirette partner come da frontend
+        heymondo_link = "https://heymondo.it/?utm_medium=Afiliado&utm_source=30SECONDSTOGUIDE&utm_campaign=PRINCIPAL&cod_descuento=30SECONDSTOGUIDE&ag_campaign=WIZARDCONTEXT&agencia=JzPWeAXXi7s0b94oPYh2FmTwaWKFpiCp1a8PkqOn&redirect=TEMPORAL"
+        heymondo_html = f"<a href='{heymondo_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Heymondo</a>"
+        clean_line = re.sub(r'\bHeymondo\b', heymondo_html, clean_line, flags=re.IGNORECASE)
+
+        kiwi_link = "https://kiwi.tpx.lt/k6iWGXOK"
+        kiwi_html = f"<a href='{kiwi_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Kiwi</a>"
+        clean_line = re.sub(r'\bKiwi(?:\.com)?\b', kiwi_html, clean_line, flags=re.IGNORECASE)
+        
+        saily_link = "https://go.saily.site/aff_c?offer_id=101&aff_id=13541&source=WIZARDTEXT"
+        saily_html = f"<a href='{saily_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Saily</a>"
+        clean_line = re.sub(r'\bSaily\b', saily_html, clean_line, flags=re.IGNORECASE)
+
+        treno_link = "https://clk.tradedoubler.com/click?a(3480952)p(376991)ttid(13)url(https://www.thetrainline.com/it/porta-un-amico?situation=td-it&utm_source=td-it)"
+        treno_html = f"<a href='{treno_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>treno</a>"
+        clean_line = re.sub(r'\btreno\b', treno_html, clean_line, flags=re.IGNORECASE)
+        
+        clean_line = inject_gyg_links(clean_line, destination)
+        line_upper = clean_line.upper()
+        
+        # Logica iniezione annunci
+        if f"{TRIGGER_CH} 2" in line_upper and not inserted_ch1:
+            formatted_body += make_html_box(FLIGHT_LINK, "FLIGHTS", ui.get("ad_flight", "").format(month=month_clean))
+            formatted_body += make_html_box(ESIM_LINK, "INTERNET", ui.get("ad_esim", ""))
+            formatted_body += make_html_box(INSURANCE_LINK, "INSURANCE", ui.get("ad_insur", ""))
+            inserted_ch1 = True
+        elif f"{TRIGGER_CH} 3" in line_upper and not inserted_ch2:
+            formatted_body += make_html_box(HOTEL_LINK, "HOTEL", ui.get("ad_hotel", "").format(month=month_clean))
+            formatted_body += make_html_box(TRANSF_LINK, "TRANSFER", ui.get("ad_transfer", ""))
+            inserted_ch2 = True
+        elif f"{TRIGGER_CH} 4" in line_upper and not inserted_ch3:
+            formatted_body += make_html_box(TIQETS_LINK, "TICKETS", ui.get("ad_tiqets", "").format(dest=dest_clean))
+            formatted_body += make_html_box(RENTAL_LINK, "RENTAL CAR", ui.get("ad_car", ""))
+            formatted_body += make_html_box(TRAIN_LINK, "TRAIN", ui.get("ad_train", ""))
+            inserted_ch3 = True
+        elif f"{TRIGGER_CH} 5" in line_upper and not inserted_ch4:
+            formatted_body += make_html_box(GYG_LINK, "TOURS", ui.get("ad_rest", ""))
+            inserted_ch4 = True
+
+        # Parsing Elementi Markdown
+        if clean_line.startswith('## '):
+            formatted_body += f"<h2 class='h2-title'>{clean_line.replace('## ', '')}</h2>"
+        elif clean_line.startswith('### '):
+            formatted_body += f"<h3 class='h3-title'>{clean_line.replace('### ', '')}</h3>"
+        elif TRIGGER_VERDICT in line_upper:
+            verdict_text = clean_line.replace('#', '').strip()
+            formatted_body += f"<div class='verdict-box'>{verdict_text}</div>"
+        elif clean_line.startswith('* ') or clean_line.startswith('- '):
+            formatted_body += f"<li>{clean_line[2:]}</li>"
+        elif re.match(r'^\d+\.', clean_line):
+            formatted_body += f"<p><strong>{clean_line}</strong></p>"
+        elif clean_line.startswith('# '):
+            continue 
+        else:
+            formatted_body += f"<p>{clean_line}</p>"
+
+    html_template = f"""
+    <!DOCTYPE html>
+    <html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @page {{
+                size: A4;
+                margin: 25mm 20mm 30mm 20mm;
+                background-color: #faf9f6;
+                background-image: 
+                    linear-gradient(rgba(26, 26, 26, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(26, 26, 26, 0.03) 1px, transparent 1px);
+                background-size: 40px 40px;
+
+                @bottom-left {{
+                    content: "30SecondsToGuide";
+                    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    font-size: 14px;
+                    font-weight: 800;
+                    color: #e67e22;
+                    padding-bottom: 5mm;
+                }}
+                @bottom-right {{
+                    content: "{ui.get('pdf_generated', '')}";
+                    font-family: monospace;
+                    font-size: 11px;
+                    color: #1a1a1a;
+                    opacity: 0.8;
+                    padding-bottom: 5mm;
+                }}
+            }}
+
+            body {{
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                color: #1a1a1a;
+                line-height: 1.6;
+                margin: 0;
+                padding: 0;
+            }}
+
+            .cover-container {{
+                page-break-after: always;
+                position: relative;
+                padding-top: 80px;
+            }}
+            .design-accent-l {{
+                position: absolute;
+                top: 40px; left: -15px;
+                width: 120px; height: 200px;
+                border-top: 12px solid #1a1a1a;
+                border-left: 12px solid #1a1a1a;
+                z-index: -1;
+            }}
+            .category-label {{
+                font-size: 13px; font-weight: 800; letter-spacing: 5px;
+                text-transform: uppercase; margin-bottom: 12px;
+                background: #faf9f6; display: inline-block; padding-right: 10px;
+            }}
+            .city-name {{
+                font-size: 65px; font-weight: 900; text-transform: uppercase;
+                margin: 0; line-height: 0.95; letter-spacing: -2px;
+                color: #e67e22;
+            }}
+            .last-letter-dot {{ color: #1a1a1a; }}
+            
+            .description-box {{
+                margin-top: 145px; padding: 25px; background-color: #ffffff;
+                border-left: 4px solid #1a1a1a; max-width: 460px; font-size: 14px;
+                color: #555; box-shadow: 8px 8px 0px rgba(26, 26, 26, 0.05);
+            }}
+
+            .content-container {{
+                page-break-after: always;
+            }}
+            .h2-title {{
+                text-transform: uppercase; font-weight: 900; letter-spacing: -1px;
+                color: #e67e22; margin-top: 40px; margin-bottom: 15px; border-bottom: 2px solid #1a1a1a; display: inline-block;
+                page-break-after: avoid; 
+            }}
+            .h3-title {{ 
+                font-weight: 800; color: #1a1a1a; margin-top: 30px; margin-bottom: 10px; 
+                page-break-after: avoid; 
+            }}
+            p, li {{ font-size: 14px; color: #333; margin-bottom: 10px; text-align: justify; }}
+            li {{ margin-left: 20px; }}
+            strong {{ color: #000000; font-weight: bold; }}
+
+            .verdict-box {{
+                margin: 30px 0; padding: 15px; background-color: #f8f9fa; 
+                border-left: 5px solid #e67e22; font-weight: bold; color: #2c3e50;
+            }}
+
+            .section-service-box {{
+                margin: 40px 0px; padding: 25px; position: relative;
+                background-color: #ffffff;
+                border: 1px solid rgba(26, 26, 26, 0.08);
+                box-shadow: 8px 8px 0px rgba(26, 26, 26, 0.05);
+                page-break-inside: avoid;
+            }}
+            .section-service-box::before {{
+                content: ""; position: absolute; top: -6px; left: -6px;
+                width: 40px; height: 40px;
+                border-top: 8px solid #1a1a1a; border-left: 8px solid #1a1a1a;
+            }}
+            .service-tag {{
+                font-size: 11px; font-weight: 800; letter-spacing: 4px;
+                text-transform: uppercase; color: #1a1a1a; display: block; margin-bottom: 10px;
+            }}
+            .service-cta {{
+                font-size: 30px; font-weight: 900; text-transform: uppercase;
+                color: #e67e22; text-decoration: none; letter-spacing: -1.5px; line-height: 1; display: block;
+            }}
+            .service-cta::after {{ content: "."; color: #1a1a1a; }}
+            .service-sub {{ font-size: 13px; color: #7f8c8d; margin-top: 8px; font-weight: 400; }}
+
+        </style>
+    </head>
+    <body>
+
+        <div class="cover-container">
+            <div class="design-accent-l"></div>
+            <div class="category-label">{ui.get('pdf_title', '')}</div>
+            <h1 class="city-name">{html_city}</h1>
+            <div class="description-box">
+                <strong>{ui.get('pdf_date', '')}:</strong> {meta_data.get('dates', '')}<br>
+                <strong>{ui.get('pdf_travellers', '')}:</strong> {meta_data.get('pax', '')}<br>
+                <strong>{ui.get('pdf_budget_target', '')}:</strong> {meta_data.get('budget', '')}
+            </div>
+            
+            <div style="margin-top: 60px; text-align: center;">
+                <a href="{GUIDE_APP_URL}" style="display:inline-block; padding:15px 25px; background-color:#e67e22; color:white; text-decoration:none; font-weight:bold; border-radius:5px;">
+                    {ui.get('pdf_promo', '')}
+                </a>
+            </div>
+        </div>
+
+        <div class="content-container">
+            {formatted_body}
+        </div>
+
+    </body>
+    </html>
+    """
+
+    return HTML(string=html_template).write_pdf()
+
+# ==========================================
+# ROTTA: /genera-standard (GUIDA POCKET)
 # ==========================================
 @app.route('/genera-standard', methods=['POST'])
 def genera_standard():
@@ -548,7 +854,6 @@ def genera_standard():
         
         pdf_bytes = create_pdf(markdown_content, city_name, lang_code)
         
-        # Generazione del timestamp corretto e popolamento foglio
         timestamp = datetime.now().strftime("%d/%m %H:%M")
         log_to_sheets([timestamp, city_clean, "GUIDE_ONLY", "----", lang_code])
         
@@ -560,6 +865,134 @@ def genera_standard():
         )
         
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ==========================================
+# ROTTA: /genera-pdf (ITINERARY WIZARD)
+# ==========================================
+@app.route('/genera-pdf', methods=['POST'])
+def genera_pdf():
+    data = request.json
+    origin = data.get('origin', '')
+    destination = data.get('destination', '')
+    start_date = data.get('startDate', '')
+    end_date = data.get('endDate', '')
+    adults = data.get('adults', 2)
+    kids = data.get('kids', 0)
+    kids_ages = data.get('kidsAges', [])
+    description = data.get('description', '')
+    budget = data.get('budget', 0)
+    budget_analysis = data.get('budgetAnalysis', '')
+    lang_code = data.get('lang_code', 'IT')
+
+    if not destination:
+        return jsonify({"error": "Destinazione mancante"}), 400
+
+    city_clean = destination.split(',')[0].strip()
+
+    try:
+        # Calcolo notti, composizione gruppo e date per il Prompt e il PDF
+        try:
+            start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+            end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+            duration_check = (end_dt - start_dt).days
+            mese_partenza = LANGUAGES.get(lang_code, LANGUAGES["IT"]).get("months", {}).get(start_dt.month, "")
+            dates_formatted = f"{start_dt.strftime('%d/%m')} - {end_dt.strftime('%d/%m/%Y')}"
+        except Exception:
+            duration_check = 3
+            mese_partenza = ""
+            dates_formatted = f"{start_date} - {end_date}"
+
+        ui = LANGUAGES.get(lang_code, LANGUAGES["IT"])
+        pax_desc = f"{adults} {ui.get('pax_adults', 'Adulti')}"
+        if kids > 0:
+            pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
+
+        model = genai.GenerativeModel("gemini-2.5-flash")
+
+        if lang_code == "IT":
+            sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget."
+            rules_lang = "Usa SOLO l'alfabeto Latino/Italiano. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colosseo]."
+            structure = f"""
+            # {destination.upper()}: [Sottotitolo]
+            **IL VERDETTO SUL BUDGET: € {budget}** (Stato: Lusso/Più che adeguato/Sufficiente/Stretto/Impossibile)
+            ## CAPITOLO 1: LA PREPARAZIONE (Voli, eSim, Assicurazione)
+            [Info trasporti ottimizza orari dei voli consultando dove possibile google flights se hai informazioni sulla città di partenza, reperisci gli ultimi prezzi da google flight se hai date precise e suggerisci Kiwi per la prenotazione sfruttando i travel hack. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima). Utilizza il mezzo di trasporto più razionale in linea con la durata del viaggio, il budget e se ci sono possiblità concrete di utilizzare mezzi alternativi all'aereo. Come eSim consiglia sempre Saily (NON per Italia/UE dove esiste roaming as at home), per l'assicurazione Heymondo con sconto 10%]
+            ## CAPITOLO 2: DOVE DORMIRE (Strategie alloggio)
+            ## CAPITOLO 3: L'ITINERARIO GIORNO PER GIORNO (Dettagliato)
+            [Itinerario ottimizzato, razionalizza gli spostamenti in base alla distanza, a seconda del mezzo di trasporto massimizza le tappe con il tempo a disposizione. Prediligi attrazioni su Tiqets e Getyourguide. Scoperta del territorio]
+            ## CAPITOLO 4: COSA MANGIARE
+            [Piatti tipici, ristoranti (verifica su Tripadvisor i migliori per la fascia di prezzo compatibile con il budget e dai riferimenti puntuali), suggerisci i posti migliori per lo street food]
+            ## CAPITOLO 5: CALENDARIO CULTURALE
+            [Festival e ricorrenze]
+            ## CAPITOLO 6: CONTO ECONOMICO FINALE [includi sempre Voli internazionali se il viaggio li necessita per la stima del budget]
+            ## CAPITOLO 7: INFORMAZIONI PRATICHE
+            ## CAPITOLO 8: CONCLUSIONE
+            """
+        else:
+            sys_prompt = "Act as a Senior Travel Planner. You don't just plan a trip, you plan a tailor-made trip that maximizes budget value."
+            rules_lang = "Use ONLY Latin/English alphabet. When you suggest a specific excursion, attraction, tour, or museum, you MUST enclose the name EXACTLY in this tag: [TOUR: Attraction Name]. Example: I recommend visiting the [TOUR: Colosseum]."
+            structure = f"""
+            # {destination.upper()}: [Subtitle]
+            **THE VERDICT ON BUDGET: € {budget}** (Status: Luxury/More than adequate/Sufficient/Tight/Impossible)
+            ## CHAPTER 1: PREPARATION (Flights, eSim, Insurance)
+            [Transport info, Saily eSim, Heymondo insurance 10% off]
+            ## CHAPTER 2: WHERE TO SLEEP (Accommodation strategies)
+            ## CHAPTER 3: DAY BY DAY ITINERARY (Detailed)
+            ## CHAPTER 4: WHAT TO EAT
+            ## CHAPTER 5: CULTURAL CALENDAR
+            ## CHAPTER 6: FINAL FINANCIAL BREAKDOWN
+            ## CHAPTER 7: PRACTICAL INFORMATION
+            ## CHAPTER 8: CONCLUSION
+            """
+
+        prompt = f"""
+        {sys_prompt}
+        Razionalizza il tempo, visita quanti più posti possibili con {duration_check} notti a disposizione.
+        Valuta la densità degli impegni giornalieri perché siano fattibili. Presta attenzione ad essere razionale negli spostamenti per massimizzare il tempo a disposizione.
+        Tieni conto delle NOTE UTENTE per personalizzare l'esperienza, ma NON ripeterle esplicitamente.
+        Crea un "Travel Plan" esclusivo per: {destination}.
+        
+        DATI:
+        - Durata: {duration_check} notti ({start_date} - {end_date})
+        - Gruppo: {pax_desc}
+        - Budget: € {budget}
+        - NOTE UTENTE: {description if description else "Nessuna nota"}
+        
+        REGOLE TASSATIVE:
+        1. {rules_lang} 2. TRASLITTERA i nomi locali. 3. Simboli Valute: EUR, USD.
+        4. USA intelligentemente il grassetto markdown (**) per evidenziare i giorni (es. **Giorno 1:**), i nomi dei luoghi, degli hotel, delle attrazioni e dei ristoranti, per rendere la lettura del documento molto più facile e scansionabile.
+        5. VIETATO USARE LISTE ANNIDATE. 6. PREZZI IN EURO CON SEPARATORE MIGLIAIA.
+        7. USA DURATA {duration_check}, non ricalcolare. 8. NON SCRIVERE I TUOI PENSIERI INTERNI.
+        
+        STRUTTURA TITOLI (Usa ESATTAMENTE questi):
+        {structure}
+        """
+        
+        response = model.generate_content(prompt)
+        markdown_content = response.text
+
+        meta_data = {
+            "dates": dates_formatted,
+            "pax": pax_desc,
+            "budget": f"EUR {budget}",
+            "month_name": mese_partenza
+        }
+        
+        pdf_bytes = create_wizard_pdf(markdown_content, destination, meta_data, lang_code)
+        
+        timestamp = datetime.now().strftime("%d/%m %H:%M")
+        log_to_sheets([timestamp, city_clean, "WIZARD", origin, lang_code, f"{adults}A+{kids}K", budget])
+        
+        return send_file(
+            io.BytesIO(pdf_bytes),
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=f"Itinerary_{city_clean.replace(' ', '_')}.pdf"
+        )
+        
+    except Exception as e:
+        print(f"Errore Wizard: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
