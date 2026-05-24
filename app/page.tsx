@@ -10,6 +10,76 @@ declare global {
   }
 }
 
+// --- NUOVO COMPONENTE STEPPER NUMERICO (Ottimizzato per Mobile e Desktop) ---
+interface StepperProps {
+  value: number;
+  onChange: (val: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  prefix?: string;
+}
+
+const NumberStepper = ({ value, onChange, min = 0, max = 99999, step = 1, prefix = "" }: StepperProps) => {
+  const handleMinus = () => {
+    if (value - step >= min) onChange(value - step);
+  };
+  
+  const handlePlus = () => {
+    if (value + step <= max) onChange(value + step);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, ''); // Accetta solo numeri
+    if (raw === '') {
+      onChange(0); // Permette di svuotare temporaneamente il campo
+    } else {
+      onChange(parseInt(raw, 10)); // Rimuove gli zeri iniziali
+    }
+  };
+
+  const handleBlur = () => {
+    // Quando l'utente smette di digitare, assicura che i limiti vengano rispettati
+    if (value < min) onChange(min);
+    if (value > max) onChange(max);
+  };
+
+  return (
+    <div className="flex items-stretch border border-gray-300 rounded-md overflow-hidden bg-white focus-within:border-[#E67E22] transition-colors h-[48px]">
+      <button 
+        type="button" 
+        onClick={handleMinus} 
+        disabled={value <= min} 
+        className="w-10 flex-shrink-0 flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-100 disabled:opacity-40 font-bold text-lg select-none border-r border-gray-200 transition"
+      >
+        &minus;
+      </button>
+      
+      <div className="flex-1 flex items-center justify-center bg-white px-1 min-w-0">
+        {prefix && <span className="text-sm font-bold text-gray-400 mr-1 select-none">{prefix}</span>}
+        <input 
+          type="text" 
+          inputMode="numeric"
+          value={value === 0 && min > 0 ? '' : value} 
+          onChange={handleChange}
+          onBlur={handleBlur}
+          className="w-full min-w-0 p-0 m-0 text-center text-sm font-bold text-[#2C3E50] focus:outline-none bg-transparent"
+        />
+      </div>
+      
+      <button 
+        type="button" 
+        onClick={handlePlus} 
+        disabled={value >= max} 
+        className="w-10 flex-shrink-0 flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-100 disabled:opacity-40 font-bold text-lg select-none border-l border-gray-200 transition"
+      >
+        &#43;
+      </button>
+    </div>
+  );
+};
+
+
 export default function Home() {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [wizardStep, setWizardStep] = useState<1 | 2 | 3 | 4>(1);
@@ -60,27 +130,22 @@ export default function Home() {
     { provider: 'GetYourGuide', label: 'Esplora e prenota tour ed esperienze locali.', url: 'https://gyg.me/YAGbtbpK' }
   ];
 
-  // Gestione temporizzatori indipendenti per il caricamento
   useEffect(() => {
     let msgInterval: NodeJS.Timeout;
     let affiliateInterval: NodeJS.Timeout;
     let triviaInterval: NodeJS.Timeout;
 
     if (loading) {
-      // 1. Frasi simpatiche (ogni 3.5s)
       msgInterval = setInterval(() => {
         setLoadingMsgIndex((prev) => (prev + 1) % loadingMessages.length);
       }, 3500);
 
-      // 2. Carosello Affiliati rallentato (ogni 10s)
       affiliateInterval = setInterval(() => {
         setCarouselIndex((prev) => (prev + 1) % affiliateLinks.length);
       }, 10000);
 
-      // 3. Carosello Curiosità (ogni 8s)
       triviaInterval = setInterval(() => {
         setTriviaIndex((prev) => {
-          // Usa una funzione sicura nel caso triviaArray sia ancora vuoto
           return triviaArray.length > 0 ? (prev + 1) % triviaArray.length : 0;
         });
       }, 8000);
@@ -395,7 +460,6 @@ export default function Home() {
 
         {loading && (
           <div className="bg-white border border-gray-200 rounded-md p-8 shadow-sm space-y-8 animate-fadeIn">
-            {/* Sezione Illusione del Lavoro */}
             <div className="text-center space-y-3 py-4">
               <div className="w-8 h-8 border-2 border-[#E67E22] border-t-transparent rounded-full animate-spin mx-auto" />
               <h3 key={loadingMsgIndex} className="text-sm font-bold uppercase tracking-widest text-[#2C3E50] animate-fadeIn">
@@ -406,7 +470,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Sezione Curiosità in carosello */}
             <div className="border-t border-b border-gray-100 py-6 min-h-[100px] flex flex-col justify-center text-center">
               {loadingTrivia ? (
                 <div className="space-y-2 animate-pulse w-full max-w-md mx-auto">
@@ -426,7 +489,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Sezione Affiliati rallentata e isolata */}
             <div className="bg-[#faf9f6] rounded-md p-6 border border-gray-100 space-y-2 text-center">
               <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 block">
                 Partner Consigliato
@@ -462,7 +524,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <button
                 onClick={() => setStep(1)}
-                className="p-8 bg-white border border-gray-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
+                className="p-8 bg-slate-50 border border-slate-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
               >
                 <div>
                   <span className="block font-bold text-lg text-[#2C3E50] tracking-tight group-hover:text-[#E67E22] transition uppercase">
@@ -477,7 +539,7 @@ export default function Home() {
 
               <button
                 onClick={() => { setStep(2); setWizardStep(1); }}
-                className="p-8 bg-white border border-gray-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
+                className="p-8 bg-orange-50 border border-orange-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
               >
                 <div>
                   <span className="block font-bold text-lg text-[#2C3E50] tracking-tight group-hover:text-[#E67E22] transition uppercase">
@@ -567,15 +629,14 @@ export default function Home() {
             {wizardStep === 2 && (
               <div className="space-y-4 animate-fadeIn">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Budget Totale (€)</label>
-                  <input
-                    type="number"
-                    min="100"
-                    step="100"
-                    value={budget}
-                    onChange={(e) => setBudget(Number(e.target.value))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm"
-                    required
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Budget Totale</label>
+                  <NumberStepper 
+                    value={budget} 
+                    onChange={setBudget} 
+                    min={100} 
+                    max={50000} 
+                    step={100} 
+                    prefix="€" 
                   />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -585,7 +646,7 @@ export default function Home() {
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm h-[48px]"
                       required
                     />
                   </div>
@@ -596,7 +657,7 @@ export default function Home() {
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       min={startDate}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm h-[48px]"
                       required
                     />
                   </div>
@@ -609,24 +670,22 @@ export default function Home() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Numero Adulti</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={adults}
-                      onChange={(e) => setAdults(Number(e.target.value))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm"
-                      required
+                    <NumberStepper 
+                      value={adults} 
+                      onChange={setAdults} 
+                      min={1} 
+                      max={20} 
+                      step={1} 
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-widest text-gray-600 mb-2">Numero Minorenni</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={kids}
-                      onChange={(e) => handleKidsChange(Number(e.target.value))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-[#E67E22] text-sm"
-                      required
+                    <NumberStepper 
+                      value={kids} 
+                      onChange={handleKidsChange} 
+                      min={0} 
+                      max={10} 
+                      step={1} 
                     />
                   </div>
                 </div>
@@ -638,14 +697,12 @@ export default function Home() {
                       {kidsAges.map((age, index) => (
                         <div key={index}>
                           <label className="block text-xs text-gray-600 mb-1">Passeggero {index + 1}</label>
-                          <input
-                            type="number"
-                            min="0"
-                            max="17"
-                            value={age}
-                            onChange={(e) => handleKidAgeChange(index, Number(e.target.value))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-[#E67E22] text-sm"
-                            required
+                          <NumberStepper 
+                            value={age} 
+                            onChange={(val) => handleKidAgeChange(index, val)} 
+                            min={0} 
+                            max={17} 
+                            step={1} 
                           />
                         </div>
                       ))}
@@ -689,8 +746,8 @@ export default function Home() {
                     
                     <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1">
                       <span>Rischio Alto</span>
-                      <span>Incongruo</span>
-                      <span>Equilibrato</span>
+                      <span className="hidden sm:inline">Incongruo</span>
+                      <span className="hidden sm:inline">Equilibrato</span>
                       <span>Eccellente</span>
                     </div>
                   </div>
@@ -736,35 +793,45 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* --- SEZIONE LINK ESTERNI IN EVIDENZA --- */}
+        {!loading && (
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <a 
+              href="https://blog.30secondstoguide.it" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-6 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-[#E67E22] transition flex items-center justify-between group"
+            >
+              <div>
+                <h3 className="text-sm font-bold text-[#2C3E50] uppercase tracking-wider group-hover:text-[#E67E22] transition">Travel Blog</h3>
+                <p className="text-xs text-gray-500 mt-1">Esplora articoli e consigli di viaggio</p>
+              </div>
+              <span className="text-[#E67E22] text-xl font-bold">&rarr;</span>
+            </a>
+            <a 
+              href="https://guide.30secondstoguide.it" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="p-6 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-[#E67E22] transition flex items-center justify-between group"
+            >
+              <div>
+                <h3 className="text-sm font-bold text-[#2C3E50] uppercase tracking-wider group-hover:text-[#E67E22] transition">Guide Pocket</h3>
+                <p className="text-xs text-gray-500 mt-1">Tutte le edizioni digitali pronte</p>
+              </div>
+              <span className="text-[#E67E22] text-xl font-bold">&rarr;</span>
+            </a>
+          </div>
+        )}
+
       </main>
 
       <footer className="max-w-2xl mx-auto px-4 pb-16 space-y-8 border-t border-gray-200 pt-12 text-xs text-gray-600">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center sm:text-left">
-          <div className="space-y-2">
-            <h4 className="font-bold text-gray-800 uppercase tracking-wider text-xs">Esplora</h4>
-            <ul className="space-y-2">
-              <li>
-                <a href="https://blog.30secondstoguide.it" target="_blank" rel="noopener noreferrer" className="hover:text-[#E67E22] transition">
-                  Travel Blog
-                </a>
-              </li>
-              <li>
-                <a href="https://guide.30secondstoguide.it" target="_blank" rel="noopener noreferrer" className="hover:text-[#E67E22] transition">
-                  Edizioni digitali pocket
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div className="space-y-2">
-            <h4 className="font-bold text-gray-800 uppercase tracking-wider text-xs">Note legali</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/privacy" className="hover:text-[#E67E22] transition">
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
+        
+        <div className="text-center sm:text-left border-b border-gray-100 pb-8">
+          <Link href="/privacy" className="font-bold text-gray-800 uppercase tracking-wider text-xs hover:text-[#E67E22] transition">
+            Note Legali e Privacy Policy
+          </Link>
         </div>
 
         <div className="text-justify bg-white border border-gray-200 rounded-md p-6 shadow-sm">
