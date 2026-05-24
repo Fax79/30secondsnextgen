@@ -67,7 +67,7 @@ LANGUAGES = {
     "IT": {
         "label": "Pocket Guide",
         "sub": "Guida turistica completa:<br>Itinerari, Storia e Cultura",
-        "disc": "Questa guida è offerta gratuitamente. Se ti è utile, nell'ultima pagina trovi una selezione di sconti exclusivi per voli e hotel che ci aiutano a mantenere il servizio attivo. <strong>Buon viaggio!</strong>",
+        "disc": "Questa guida è offerta gratuitamente. Se ti è utile, nell'ultima pagina trovi una selezione di sconti esclusivi per voli e hotel che ci aiutano a mantenere il servizio attivo. <strong>Buon viaggio!</strong>",
         "planner": "Travel Planner",
         "insight": "Travel Insight",
         "must": "Non partire senza",
@@ -156,7 +156,7 @@ TESTO_MODELLO_IT = """
 ### Piatti Imperdibili
 * **[Piatto 1]:** [Descrizione e ingredienti]
 * **[Piatto 2]:** [Descrizione e ingredienti]
-* **[il cibo tradicional]:** [i migliori ristoranti, i più caratteristici, consigli per risparmiare]
+* **[il cibo tradizionale]:** [i migliori ristoranti, i più caratteristici, consigli per risparmiare]
 * **[bevande tradizionali]:** [i migliori locali, i più caratteristici, consigli per risparmiare]
 
 ## 5. Attrazioni
@@ -804,7 +804,8 @@ def create_wizard_pdf(text, destination, meta_data, lang_code="IT"):
 def genera_standard():
     data = request.json
     city_name = data.get('destination')
-    lang_code = data.get('lang_code', 'IT')
+    # lang_code = data.get('lang_code', 'IT') # Forzato a IT
+    lang_code = "IT"
 
     if not city_name:
         return jsonify({"error": "Destinazione mancante"}), 400
@@ -855,7 +856,8 @@ def genera_standard():
         pdf_bytes = create_pdf(markdown_content, city_name, lang_code)
         
         timestamp = datetime.now().strftime("%d/%m %H:%M")
-        log_to_sheets([timestamp, city_clean, "GUIDE_ONLY", "----", lang_code])
+        # Array di 9 elementi per allineamento colonne
+        log_to_sheets([timestamp, city_clean, "GUIDE_ONLY", "-", "-", "-", "-", "IT", "-"])
         
         return send_file(
             io.BytesIO(pdf_bytes),
@@ -883,7 +885,8 @@ def genera_pdf():
     description = data.get('description', '')
     budget = data.get('budget', 0)
     budget_analysis = data.get('budgetAnalysis', '')
-    lang_code = data.get('lang_code', 'IT')
+    # lang_code = data.get('lang_code', 'IT') # Forzato a IT
+    lang_code = "IT"
 
     if not destination:
         return jsonify({"error": "Destinazione mancante"}), 400
@@ -891,7 +894,6 @@ def genera_pdf():
     city_clean = destination.split(',')[0].strip()
 
     try:
-        # Calcolo notti, composizione gruppo e date per il Prompt e il PDF
         try:
             start_dt = datetime.strptime(start_date, "%Y-%m-%d")
             end_dt = datetime.strptime(end_date, "%Y-%m-%d")
@@ -982,7 +984,9 @@ def genera_pdf():
         pdf_bytes = create_wizard_pdf(markdown_content, destination, meta_data, lang_code)
         
         timestamp = datetime.now().strftime("%d/%m %H:%M")
-        log_to_sheets([timestamp, city_clean, "WIZARD", origin, lang_code, f"{adults}A+{kids}K", budget])
+        ages_str = ", ".join(map(str, kids_ages)) if kids > 0 else "-"
+        # Array di 9 elementi per allineamento colonne
+        log_to_sheets([timestamp, city_clean, budget, duration_check, adults, kids, ages_str, "IT", origin])
         
         return send_file(
             io.BytesIO(pdf_bytes),

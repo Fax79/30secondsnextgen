@@ -469,7 +469,7 @@ export default function Home() {
                     Guida Standar<span className="text-[#E67E22]">d.</span>
                   </span>
                   <p className="text-sm text-gray-600 mt-3 leading-relaxed">
-                    Analisi della destinazione: cenni storici, quartieri, attrazioni principali e cultura gastronomica locale.
+                    Guida della città: cenni storici, quartieri, attrazioni principali e cultura gastronomica. Per passare da zero a local in un minuto.
                   </p>
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#E67E22] mt-4 block">Procedi &rarr;</span>
@@ -484,7 +484,7 @@ export default function Home() {
                     Itinerary Wizar<span className="text-[#E67E22]">d.</span>
                   </span>
                   <p className="text-sm text-gray-600 mt-3 leading-relaxed">
-                    Pianificazione sequenziale giorno per giorno ottimizzata in base a budget, tempistiche e composizione del gruppo.
+                    Il tuo itinerario disegnato dal nostro Wizard e ottimizzato in base a budget, tempistiche e composizione del gruppo.
                   </p>
                 </div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#E67E22] mt-4 block">Procedi &rarr;</span>
