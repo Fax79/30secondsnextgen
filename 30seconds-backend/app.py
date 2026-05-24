@@ -21,14 +21,17 @@ CORS(app)
 def get_gspread_client():
     creds_json = os.getenv('GCP_SERVICE_ACCOUNT')
     if not creds_json:
+        print("ERRORE SHEETS: La variabile GCP_SERVICE_ACCOUNT è vuota o non trovata in Render!")
         return None
     try:
+        # Gestione sicura dei ritorni a capo
         creds_json = creds_json.replace('\\n', '\n')
         creds_dict = json.loads(creds_json)
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         return gspread.authorize(creds)
-    except:
+    except Exception as e:
+        print(f"ERRORE SHEETS AUTENTICAZIONE (Il JSON potrebbe essere formattato male): {e}")
         return None
 
 def log_to_sheets(data):
@@ -37,8 +40,11 @@ def log_to_sheets(data):
         try:
             sheet = client.open("30Seconds_Stats").sheet1
             sheet.append_row(data)
+            print("SHEETS SUCCESS: Riga salvata correttamente nel foglio Google!")
         except Exception as e:
-            print(f"Errore logging Sheets: {e}")
+            print(f"ERRORE SHEETS SCRITTURA (File non trovato o permessi mancanti): {e}")
+    else:
+        print("ERRORE SHEETS: Il salvataggio è stato annullato perché il client non si è avviato.")
 
 # --- CONFIGURAZIONE API ---
 api_key = os.getenv("GOOGLE_API_KEY")
