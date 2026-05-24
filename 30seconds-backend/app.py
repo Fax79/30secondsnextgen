@@ -21,17 +21,21 @@ CORS(app)
 def get_gspread_client():
     creds_json = os.getenv('GCP_SERVICE_ACCOUNT')
     if not creds_json:
-        print("ERRORE SHEETS: La variabile GCP_SERVICE_ACCOUNT è vuota o non trovata in Render!")
+        print("ERRORE SHEETS: La variabile GCP_SERVICE_ACCOUNT è vuota o non trovata in Render!", flush=True)
         return None
     try:
-        # Gestione sicura dei ritorni a capo
-        creds_json = creds_json.replace('\\n', '\n')
+        # Carica il JSON pulito senza modificarlo prima del parsing
         creds_dict = json.loads(creds_json)
+        
+        # Correggi i ritorni a capo all'interno della singola stringa della chiave privata, se necessario
+        if 'private_key' in creds_dict:
+            creds_dict['private_key'] = creds_dict['private_key'].replace('\\n', '\n')
+            
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         return gspread.authorize(creds)
     except Exception as e:
-        print(f"ERRORE SHEETS AUTENTICAZIONE (Il JSON potrebbe essere formattato male): {e}")
+        print(f"ERRORE SHEETS AUTENTICAZIONE (Il JSON potrebbe essere formattato male): {e}", flush=True)
         return None
 
 def log_to_sheets(data):
