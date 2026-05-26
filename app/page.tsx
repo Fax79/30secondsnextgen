@@ -540,6 +540,7 @@ export default function Home() {
 
               <button
                 onClick={() => { setStep(2); setWizardStep(1); }}
+                data-umami-event="Wizard_Selected"
                 className="p-8 bg-orange-50 border border-orange-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
               >
                 <div>
@@ -578,6 +579,7 @@ export default function Home() {
               </button>
               <button
                 type="submit"
+                data-umami-event="Guida_Start_Generate"
                 className="w-2/3 py-3 bg-[#2C3E50] text-white text-xs font-bold uppercase tracking-wider rounded-md hover:bg-[#1a252f] transition"
               >
                 Genera Guida PDF
@@ -776,6 +778,7 @@ export default function Home() {
               {wizardStep < 4 ? (
                 <button
                   type="button"
+                  data-umami-event="Budget_generate"
                   onClick={nextWizardStep}
                   className="w-2/3 py-3 bg-[#2C3E50] text-white text-xs font-bold uppercase tracking-wider rounded-md hover:bg-[#1a252f] transition"
                   disabled={loadingBudget}
@@ -785,6 +788,7 @@ export default function Home() {
               ) : (
                 <button
                   type="button"
+                  data-umami-event="Wizard_Start_Generate"
                   onClick={handleGenerateWizard}
                   className="w-2/3 py-3 bg-[#E67E22] text-white text-xs font-bold uppercase tracking-wider rounded-md hover:bg-[#d35400] transition"
                 >
