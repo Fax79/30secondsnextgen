@@ -524,6 +524,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <button
                 onClick={() => setStep(1)}
+                data-umami-event="Guida_Selected"
                 className="p-8 bg-slate-50 border border-slate-200 hover:border-[#E67E22] rounded-md shadow-sm text-left transition group flex flex-col justify-between min-h-[200px]"
               >
                 <div>
