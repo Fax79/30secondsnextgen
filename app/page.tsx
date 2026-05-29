@@ -287,7 +287,7 @@ export default function Home() {
     setTriviaIndex(0);
     const destName = destination.split(',')[0];
     
-    const prompt = `Restituisci STRETTAMENTE ESCLUSIVAMENTE un array JSON valido contenente 3 stringhe. Ogni stringa deve essere una curiosità o un cenno storico interessante, insolito e professionalmente accurato su ${destName}. Stile editoriale e formale, massimo 30 parole per stringa. Esempio di output desiderato: ["Curiosità 1...", "Curiosità 2...", "Curiosità 3..."]`;
+    const prompt = `Restituisci STRETTAMENTE ESCLUSIVAMENTE un array JSON valido contenente 3 stringhe. NON USARE CARATTERI CHE POSSONO COMPROMETTERE IL JSON come a capo, simboli, ecc. Ogni stringa deve essere una curiosità o un cenno storico interessante, insolito e professionalmente accurato su ${destName}. Stile editoriale e formale, in italiano, massimo 30 parole per stringa. Esempio di output desiderato: ["Curiosità 1...", "Curiosità 2...", "Curiosità 3..."]`;
     
     try {
       const jsonString = await callGeminiClient(prompt, true);
