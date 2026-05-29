@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const { destination } = await req.json();
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `Genera una singola curiosità affascinante e brevissima su ${destination}. 
+    const prompt = `Genera una singola curiosità in italiano affascinante e brevissima su ${destination}. 
     Focus su cultura, storia o aneddoti artistici. 
     Stile editoriale raffinato (stile Lonely Planet). 
     Massimo 15 parole. Non usare introduzioni tipo "Ecco la curiosità".`;
