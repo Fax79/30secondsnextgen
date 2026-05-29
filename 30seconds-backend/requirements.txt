@@ -5,3 +5,4 @@ google-generativeai
 WeasyPrint
 gspread
 oauth2client
+PyJWT

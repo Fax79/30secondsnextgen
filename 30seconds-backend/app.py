@@ -4,6 +4,7 @@ import urllib.parse
 import io
 import json
 import gspread
+import jwt
 from datetime import datetime
 from flask import Flask, request, send_file, jsonify, abort
 from flask_cors import CORS
@@ -26,13 +27,24 @@ CORS(app, resources={r"/*": {"origins": [
 # --- 2. CONTROLLO AUTENTICAZIONE TRAMITE TOKEN ---
 @app.before_request
 def verify_token():
-    # Escludi le rotte di root o health check se usate da Render
-    if request.path == '/' or request.path == '/health':
+    # Escludi le richieste preflight CORS e le rotte di root/health
+    if request.method == 'OPTIONS' or request.path == '/' or request.path == '/health':
         return
         
-    token = request.headers.get("X-Internal-Token")
-    if not token or token != os.environ.get("APP_INTERNAL_TOKEN"):
-        abort(401)
+    auth_header = request.headers.get('Authorization')
+    
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({"error": "Accesso negato. Token di sicurezza mancante."}), 401
+        
+    token = auth_header.split(" ")[1]
+    
+    try:
+        secret_key = os.environ.get("JWT_SECRET_KEY")
+        jwt.decode(token, secret_key, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Il token temporaneo è scaduto. Riprovare."}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Token di sicurezza non valido."}), 401
 
 # --- CONFIGURAZIONE GOOGLE SHEETS ---
 def get_gspread_client():
@@ -850,9 +862,7 @@ def genera_standard():
             2. Se devi fare un confronto, usa elenchi puntati descrittivi.
             3. Usa ESATTAMENTE la struttura seguente.
             4. Scrivi paragrafi ricchi e lunghi.
-            5. Se viene inserita una nazione, una regione, un'area geografica produci la guida per la città principale, aggiungi una premessa prima del capitolo 1 in cui elenchi eventuali altre città esortando a fare guide separate, suggerisci anche di utilizzare il bottone dell'"ITINERARY WIZARD" che trovano nel sito.
-            6. Se viene inserita un parola o una frase che non sono luoghi geografici rispondi in modo scherzoso ma sintetico, non usare la struttura della guida.
-            7. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
+            5. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
             """
         else:
             sys_instruct = "You are an expert travel writer (Lonely Planet/National Geographic style). Write a DETAILED guide for:"
@@ -946,7 +956,7 @@ def genera_pdf():
             # {destination.upper()}: [Sottotitolo]
             **IL VERDETTO SUL BUDGET: € {budget}** (Stato: Lusso/Più che adeguato/Sufficiente/Stretto/Impossibile)
             ## CAPITOLO 1: LA PREPARAZIONE (Voli, eSim, Assicurazione)
-            [Info trasporti ottimizza orari dei voli consultando dove possibile google flights se hai informazioni sulla città di partenza, reperisci gli ultimi prezzi da google flight se hai date precise e suggerisci Kiwi per la prenotazione sfruttando i travel hack. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima). Utilizza il mezzo di trasporto più razionale in linea con la durata del viaggio, il budget e se ci sono possiblità concrete di utilizzare mezzi alternativi all'aereo. Come eSim consiglia sempre Saily (NON per Italia/UE dove esiste roaming as at home), per l'assicurazione Heymondo con sconto 10%]
+            [Info trasporti ottimizza orari dei voli consultando google flights dagli aeroporti più vicini o più efficientemente utilizzabili da {origin}, reperisci gli ultimi prezzi da google flight se hai date precise e suggerisci Kiwi per la prenotazione sfruttando i travel hack. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima). Utilizza il mezzo di trasporto più razionale in linea con la durata del viaggio, il budget e se ci sono possiblità concrete di utilizzare mezzi alternativi all'aereo. Come eSim consiglia sempre Saily (NON per Italia/UE dove esiste roaming as at home), per l'assicurazione Heymondo con sconto 10%]
             ## CAPITOLO 2: DOVE DORMIRE (Strategie alloggio)
             ## CAPITOLO 3: L'ITINERARIO GIORNO PER GIORNO (Dettagliato)
             [Itinerario ottimizzato, razionalizza gli spostamenti in base alla distanza, a seconda del mezzo di trasporto massimizza le tappe con il tempo a disposizione. Prediligi attrazioni su Tiqets e Getyourguide. Scoperta del territorio]
