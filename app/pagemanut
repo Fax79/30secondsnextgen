@@ -30,13 +30,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {/* Assicurati che l'href corrisponda ai tuoi reali percorsi (es. /blog, https://tuoblog.it) */}
             <Link 
-              href="/blog" 
+              href="https://blog.30secondstoguide.it" 
               className="px-6 py-4 bg-slate-50 border border-slate-200 hover:border-slate-400 rounded-md transition text-slate-800 font-medium shadow-sm"
             >
               Visita il Blog
             </Link>
             <Link 
-              href="/pocket" 
+              href="https://guide.30secondstoguide.it" 
               className="px-6 py-4 bg-slate-50 border border-slate-200 hover:border-slate-400 rounded-md transition text-slate-800 font-medium shadow-sm"
             >
               Sfoglia le Guide Pocket

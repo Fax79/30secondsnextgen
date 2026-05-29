@@ -950,13 +950,13 @@ def genera_pdf():
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         if lang_code == "IT":
-            sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget."
+            sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
             rules_lang = "Usa SOLO l'alfabeto Latino/Italiano. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colosseo]."
             structure = f"""
             # {destination.upper()}: [Sottotitolo]
             **IL VERDETTO SUL BUDGET: € {budget}** (Stato: Lusso/Più che adeguato/Sufficiente/Stretto/Impossibile)
             ## CAPITOLO 1: LA PREPARAZIONE (Voli, eSim, Assicurazione)
-            [Info trasporti ottimizza orari dei voli consultando google flights dagli aeroporti più vicini o più efficientemente utilizzabili da {origin}, reperisci gli ultimi prezzi da google flight se hai date precise e suggerisci Kiwi per la prenotazione sfruttando i travel hack. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima). Utilizza il mezzo di trasporto più razionale in linea con la durata del viaggio, il budget e se ci sono possiblità concrete di utilizzare mezzi alternativi all'aereo. Come eSim consiglia sempre Saily (NON per Italia/UE dove esiste roaming as at home), per l'assicurazione Heymondo con sconto 10%]
+            [Info trasporti ottimizza orari dei voli consultando google flights dagli aeroporti più vicini o più efficientemente utilizzabili da {origin}, reperisci gli ultimi prezzi da google flight se hai date precise e suggerisci Kiwi per la prenotazione sfruttando i travel hack. Utilizza il mezzo di trasporto più razionale in linea con la durata del viaggio, il budget e se ci sono possiblità concrete di utilizzare mezzi alternativi all'aereo. Come eSim consiglia sempre Saily (NON per Italia/UE dove esiste roaming as at home), per l'assicurazione Heymondo con sconto 10%]
             ## CAPITOLO 2: DOVE DORMIRE (Strategie alloggio)
             ## CAPITOLO 3: L'ITINERARIO GIORNO PER GIORNO (Dettagliato)
             [Itinerario ottimizzato, razionalizza gli spostamenti in base alla distanza, a seconda del mezzo di trasporto massimizza le tappe con il tempo a disposizione. Prediligi attrazioni su Tiqets e Getyourguide. Scoperta del territorio]
@@ -964,7 +964,8 @@ def genera_pdf():
             [Piatti tipici, ristoranti (verifica su Tripadvisor i migliori per la fascia di prezzo compatibile con il budget e dai riferimenti puntuali), suggerisci i posti migliori per lo street food]
             ## CAPITOLO 5: CALENDARIO CULTURALE
             [Festival e ricorrenze]
-            ## CAPITOLO 6: CONTO ECONOMICO FINALE [includi sempre Voli internazionali se il viaggio li necessita per la stima del budget]
+            ## CAPITOLO 6: CONTO ECONOMICO FINALE
+            [includi sempre Voli internazionali se il viaggio li necessita per la stima del budget]
             ## CAPITOLO 7: INFORMAZIONI PRATICHE
             ## CAPITOLO 8: CONCLUSIONE
             """
