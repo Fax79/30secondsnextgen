@@ -5,7 +5,7 @@ import io
 import json
 import gspread
 from datetime import datetime
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file, jsonify, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -15,7 +15,24 @@ from oauth2client.service_account import ServiceAccountCredentials
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+
+# --- 1. CONFIGURAZIONE CORS RIGOROSA ---
+CORS(app, resources={r"/*": {"origins": [
+    "https://30secondstoguide.it",
+    "https://www.30secondstoguide.it",
+    "http://localhost:3000"
+]}})
+
+# --- 2. CONTROLLO AUTENTICAZIONE TRAMITE TOKEN ---
+@app.before_request
+def verify_token():
+    # Escludi le rotte di root o health check se usate da Render
+    if request.path == '/' or request.path == '/health':
+        return
+        
+    token = request.headers.get("X-Internal-Token")
+    if not token or token != os.environ.get("APP_INTERNAL_TOKEN"):
+        abort(401)
 
 # --- CONFIGURAZIONE GOOGLE SHEETS ---
 def get_gspread_client():
