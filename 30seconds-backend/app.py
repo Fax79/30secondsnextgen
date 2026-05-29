@@ -944,13 +944,14 @@ def genera_pdf():
 
         ui = LANGUAGES.get(lang_code, LANGUAGES["IT"])
         pax_desc = f"{adults} {ui.get('pax_adults', 'Adulti')}"
+        today_str = datetime.now().strftime("%d/%m/%Y")
         if kids > 0:
             pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
 
         model = genai.GenerativeModel("gemini-2.5-flash")
 
         if lang_code == "IT":
-            sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA ODIERNA RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
+            sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA DI OGGI, CHE E' {today_str}, RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
             rules_lang = "Usa SOLO l'alfabeto Latino/Italiano. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colosseo]."
             structure = f"""
             # {destination.upper()}: [Sottotitolo]
@@ -995,6 +996,7 @@ def genera_pdf():
         
         DATI:
         - Durata: {duration_check} notti ({start_date} - {end_date})
+        - Data odierna di elaborazione (usa questa come riferimento temporale attuale): {today_str}
         - Gruppo: {pax_desc}
         - Budget: € {budget}
         - NOTE UTENTE: {description if description else "Nessuna nota"}
