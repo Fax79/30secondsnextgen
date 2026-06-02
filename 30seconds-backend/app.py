@@ -856,14 +856,14 @@ def genera_standard():
         model = genai.GenerativeModel("gemini-2.5-flash")
         
         if lang_code == "IT":
-            sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate a {today_str} per:"
+            sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate per:"
             base_prompt = TESTO_MODELLO_IT
             rules = """
             1. NON USARE MAI TABELLE MARKDOWN (niente righe con | |).
             2. Se devi fare un confronto, usa elenchi puntati descrittivi.
             3. Usa ESATTAMENTE la struttura seguente.
             4. Scrivi paragrafi ricchi e lunghi.
-            5. CONTESTO TEMPORALE: Hai l'obbligo di utilizzare le informazioni macroeconomiche e geopolitiche aggiornate alla data {today_str} (es. Verifica accuratamente i recenti ingressi nell'Eurozona, la documentazione necessaria all'ingresso nel paese, ecc).
+            5. CONTESTO TEMPORALE: Hai l'obbligo di utilizzare le informazioni macroeconomiche e geopolitiche aggiornate alla data di oggi (es. Verifica accuratamente i recenti ingressi nell'Eurozona, la documentazione necessaria all'ingresso nel paese, ecc).
             6. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
             """
         else:
@@ -884,6 +884,9 @@ def genera_standard():
         
         RULES:
         {rules}
+
+        CURRENT DATE:
+        {today_str}
         
         MODEL:
         {base_prompt}
