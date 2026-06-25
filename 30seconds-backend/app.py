@@ -80,9 +80,33 @@ def log_to_sheets(data):
         print("ERRORE SHEETS: Il salvataggio è stato annullato perché il client non si è avviato.")
 
 # --- CONFIGURAZIONE API ---
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+api_json_str = os.getenv("GOOGLE_API_KEY")
+
+if api_json_str:
+    try:
+        # Decodifica la stringa JSON
+        api_data = json.loads(api_json_str)
+
+        # Se è un Service Account JSON completo (esattamente come quello di Sheets)
+        if "private_key" in api_data:
+            # Correzione dei ritorni a capo per la chiave privata
+            api_data["private_key"] = api_data["private_key"].replace("\\n", "\n")
+            
+            # Generazione delle credenziali OAuth2
+            credentials = service_account.Credentials.from_service_account_info(api_data)
+            genai.configure(credentials=credentials)
+
+        # Fallback: nel caso in cui sia solo un JSON personalizzato con dentro la chiave piatta
+        elif "api_key" in api_data:
+            genai.configure(api_key=api_data["api_key"])
+
+        else:
+            print("ERRORE GEMINI API: Il JSON non contiene i campi attesi ('private_key' o 'api_key').", flush=True)
+
+    except json.JSONDecodeError as e:
+        print(f"ERRORE GEMINI API JSON: Formato non valido. Dettagli: {e}", flush=True)
+    except Exception as e:
+        print(f"ERRORE GEMINI API CONFIGURAZIONE: {e}", flush=True)
 
 # ==========================================
 # LINK TRACCIATI
