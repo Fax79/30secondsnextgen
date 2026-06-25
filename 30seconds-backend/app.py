@@ -79,32 +79,35 @@ def log_to_sheets(data):
     else:
         print("ERRORE SHEETS: Il salvataggio è stato annullato perché il client non si è avviato.")
 
+from google.oauth2 import service_account
+
 # --- CONFIGURAZIONE API ---
 api_json_str = os.getenv("GOOGLE_API_KEY")
 
 if api_json_str:
+    # 1. Rimuovi la variabile dall'ambiente per bloccare l'auto-inserimento dell'header gRPC
+    if "GOOGLE_API_KEY" in os.environ:
+        del os.environ["GOOGLE_API_KEY"]
+
     try:
-        # Decodifica la stringa JSON
+        # 2. Decodifica la stringa JSON
         api_data = json.loads(api_json_str)
 
-        # Se è un Service Account JSON completo (esattamente come quello di Sheets)
+        # 3. Verifica se è un JSON di un Service Account
         if "private_key" in api_data:
-            # Correzione dei ritorni a capo per la chiave privata
+            # Correggi i ritorni a capo
             api_data["private_key"] = api_data["private_key"].replace("\\n", "\n")
             
-            # Generazione delle credenziali OAuth2
+            # Genera le credenziali OAuth2
             credentials = service_account.Credentials.from_service_account_info(api_data)
+            
+            # Configura Gemini passando l'oggetto credentials, NON la api_key
             genai.configure(credentials=credentials)
 
-        # Fallback: nel caso in cui sia solo un JSON personalizzato con dentro la chiave piatta
         elif "api_key" in api_data:
+            # Fallback se è un JSON personalizzato con dentro una chiave piatta
             genai.configure(api_key=api_data["api_key"])
 
-        else:
-            print("ERRORE GEMINI API: Il JSON non contiene i campi attesi ('private_key' o 'api_key').", flush=True)
-
-    except json.JSONDecodeError as e:
-        print(f"ERRORE GEMINI API JSON: Formato non valido. Dettagli: {e}", flush=True)
     except Exception as e:
         print(f"ERRORE GEMINI API CONFIGURAZIONE: {e}", flush=True)
 
