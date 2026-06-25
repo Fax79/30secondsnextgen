@@ -9,7 +9,9 @@ from datetime import datetime
 from flask import Flask, request, send_file, jsonify, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
-import google.generativeai as genai
+import vertexai
+from vertexai.generative_models import GenerativeModel
+from google.oauth2 import service_account
 from weasyprint import HTML
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -81,12 +83,26 @@ def log_to_sheets(data):
 
 from google.oauth2 import service_account
 
-# --- CONFIGURAZIONE API ---
-api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
-else:
-    print("ERRORE: GOOGLE_API_KEY non trovata o vuota in Render.", flush=True)
+# --- CONFIGURAZIONE API VERTEX AI ---
+api_json_str = os.getenv("GOOGLE_API_KEY")
+
+if api_json_str:
+    try:
+        api_data = json.loads(api_json_str)
+        if "private_key" in api_data:
+            api_data["private_key"] = api_data["private_key"].replace("\\n", "\n")
+            credentials = service_account.Credentials.from_service_account_info(api_data)
+            
+            # Inizializzazione Vertex AI
+            vertexai.init(
+                project=api_data["project_id"], 
+                location="us-central1", 
+                credentials=credentials
+            )
+        else:
+            print("ERRORE VERTEX AI: Il JSON non contiene 'private_key'.", flush=True)
+    except Exception as e:
+        print(f"ERRORE VERTEX AI CONFIGURAZIONE: {e}", flush=True)
 
 # ==========================================
 # LINK TRACCIATI
@@ -857,7 +873,7 @@ def genera_standard():
 
     try:
         today_str = datetime.now().strftime("%d/%m/%Y")
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = GenerativeModel("gemini-2.5-flash")
 
         if lang_code == "IT":
             sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate per:"
@@ -963,7 +979,7 @@ def genera_pdf():
         if kids > 0:
             pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
 
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = GenerativeModel("gemini-2.5-flash")
 
         if lang_code == "IT":
             sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA DI OGGI, CHE E' {today_str}, RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."

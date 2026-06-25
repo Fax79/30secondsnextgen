@@ -1,7 +1,7 @@
 Flask
 Flask-Cors
 python-dotenv
-google-generativeai
+google-cloud-aiplatform
 WeasyPrint
 gspread
 oauth2client
