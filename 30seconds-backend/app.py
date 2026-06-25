@@ -913,7 +913,13 @@ def genera_standard():
         )
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        print("=== ERRORE CRITICO IN GENERA-STANDARD ===", flush=True)
+        print(f"Tipo di errore: {type(e).__name__}", flush=True)
+        print(f"Dettaglio: {str(e)}", flush=True)
+        print(traceback.format_exc(), flush=True)
+        print("=========================================", flush=True)
+        return jsonify({"error": "Errore interno. Controlla i log di Render."}), 500
 
 # ==========================================
 # ROTTA: /genera-pdf (ITINERARY WIZARD)
@@ -1045,8 +1051,13 @@ def genera_pdf():
         )
 
     except Exception as e:
-        print(f"Errore Wizard: {e}")
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        print("=== ERRORE CRITICO IN GENERA-WIZRD ===", flush=True)
+        print(f"Tipo di errore: {type(e).__name__}", flush=True)
+        print(f"Dettaglio: {str(e)}", flush=True)
+        print(traceback.format_exc(), flush=True)
+        print("=========================================", flush=True)
+        return jsonify({"error": "Errore interno. Controlla i log di Render."}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
