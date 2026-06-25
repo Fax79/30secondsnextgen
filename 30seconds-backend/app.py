@@ -9,7 +9,8 @@ from datetime import datetime
 from flask import Flask, request, send_file, jsonify, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from weasyprint import HTML
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -81,8 +82,10 @@ def log_to_sheets(data):
 
 # --- CONFIGURAZIONE API ---
 api_key = os.getenv("GOOGLE_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+if not api_key:
+    raise ValueError("La variabile d'ambiente GOOGLE_API_KEY non è impostata.")
+
+client = genai.Client(api_key=api_key)
 
 # ==========================================
 # LINK TRACCIATI
@@ -853,8 +856,7 @@ def genera_standard():
 
     try:
         today_str = datetime.now().strftime("%d/%m/%Y")
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        
+                
         if lang_code == "IT":
             sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate per:"
             base_prompt = TESTO_MODELLO_IT
@@ -892,7 +894,10 @@ def genera_standard():
         {base_prompt}
         """
         
-        response = model.generate_content(full_prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=full_prompt
+        )
         markdown_content = response.text
         
         pdf_bytes = create_pdf(markdown_content, city_name, lang_code)
@@ -953,8 +958,7 @@ def genera_pdf():
         if kids > 0:
             pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
 
-        model = genai.GenerativeModel("gemini-2.5-flash")
-
+        
         if lang_code == "IT":
             sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA DI OGGI, CHE E' {today_str}, RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
             rules_lang = "Usa SOLO l'alfabeto Latino/Italiano. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colosseo]."
@@ -1016,7 +1020,10 @@ def genera_pdf():
         {structure}
         """
         
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", 
+            contents=prompt
+        )
         markdown_content = response.text
 
         meta_data = {
