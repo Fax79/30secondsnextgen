@@ -82,34 +82,11 @@ def log_to_sheets(data):
 from google.oauth2 import service_account
 
 # --- CONFIGURAZIONE API ---
-api_json_str = os.getenv("GOOGLE_API_KEY")
-
-if api_json_str:
-    # 1. Rimuovi la variabile dall'ambiente per bloccare l'auto-inserimento dell'header gRPC
-    if "GOOGLE_API_KEY" in os.environ:
-        del os.environ["GOOGLE_API_KEY"]
-
-    try:
-        # 2. Decodifica la stringa JSON
-        api_data = json.loads(api_json_str)
-
-        # 3. Verifica se è un JSON di un Service Account
-        if "private_key" in api_data:
-            # Correggi i ritorni a capo
-            api_data["private_key"] = api_data["private_key"].replace("\\n", "\n")
-            
-            # Genera le credenziali OAuth2
-            credentials = service_account.Credentials.from_service_account_info(api_data)
-            
-            # Configura Gemini passando l'oggetto credentials, NON la api_key
-            genai.configure(credentials=credentials)
-
-        elif "api_key" in api_data:
-            # Fallback se è un JSON personalizzato con dentro una chiave piatta
-            genai.configure(api_key=api_data["api_key"])
-
-    except Exception as e:
-        print(f"ERRORE GEMINI API CONFIGURAZIONE: {e}", flush=True)
+api_key = os.getenv("GOOGLE_API_KEY")
+if api_key:
+    genai.configure(api_key=api_key)
+else:
+    print("ERRORE: GOOGLE_API_KEY non trovata o vuota in Render.", flush=True)
 
 # ==========================================
 # LINK TRACCIATI
