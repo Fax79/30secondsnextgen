@@ -9,8 +9,7 @@ from datetime import datetime
 from flask import Flask, request, send_file, jsonify, abort
 from flask_cors import CORS
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from weasyprint import HTML
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -31,14 +30,14 @@ def verify_token():
     # Escludi le richieste preflight CORS e le rotte di root/health
     if request.method == 'OPTIONS' or request.path == '/' or request.path == '/health':
         return
-        
+
     auth_header = request.headers.get('Authorization')
-    
+
     if not auth_header or not auth_header.startswith('Bearer '):
         return jsonify({"error": "Accesso negato. Token di sicurezza mancante."}), 401
-        
+
     token = auth_header.split(" ")[1]
-    
+
     try:
         secret_key = os.environ.get("JWT_SECRET_KEY")
         jwt.decode(token, secret_key, algorithms=["HS256"])
@@ -56,11 +55,11 @@ def get_gspread_client():
     try:
         # Carica il JSON pulito senza modificarlo prima del parsing
         creds_dict = json.loads(creds_json)
-        
+
         # Correggi i ritorni a capo all'interno della singola stringa della chiave privata, se necessario
         if 'private_key' in creds_dict:
             creds_dict['private_key'] = creds_dict['private_key'].replace('\\n', '\n')
-            
+
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         return gspread.authorize(creds)
@@ -82,10 +81,8 @@ def log_to_sheets(data):
 
 # --- CONFIGURAZIONE API ---
 api_key = os.getenv("GOOGLE_API_KEY")
-if not api_key:
-    raise ValueError("La variabile d'ambiente GOOGLE_API_KEY non è impostata.")
-
-client = genai.Client(api_key=api_key)
+if api_key:
+    genai.configure(api_key=api_key)
 
 # ==========================================
 # LINK TRACCIATI
@@ -115,7 +112,7 @@ LANGUAGES = {
         "must": "Non partire senza",
         "gen": "WWW.30SECONDSTOGUIDE.IT",
         "footer_msg": "Questa guida è gratuita grazie ai nostri partner. Usando questi link supporti il nostro lavoro. Buon viaggio!",
-        
+
         # Nuove chiavi Itinerary Wizard
         "months": {1: "Gennaio", 2: "Febbraio", 3: "Marzo", 4: "Aprile", 5: "Maggio", 6: "Giugno", 7: "Luglio", 8: "Agosto", 9: "Settembre", 10: "Ottobre", 11: "Novembre", 12: "Dicembre"},
         "pax_adults": "Adulti",
@@ -148,7 +145,7 @@ LANGUAGES = {
         "must": "Must have",
         "gen": "WWW.30SECONDSTOGUIDE.IT",
         "footer_msg": "This guide is free thanks to our partners. Using these links supports our work. Have a great trip!",
-        
+
         # Nuove chiavi Itinerary Wizard
         "months": {1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 7: "July", 8: "August", 9: "September", 10: "October", 11: "November", 12: "December"},
         "pax_adults": "Adults",
@@ -331,7 +328,7 @@ def create_pdf(text, city, lang_code="IT"):
     city_upper = city_clean.strip().upper()
     if len(city_upper) > 24:
         city_upper = city_upper[:21] + "..."
-    
+
     if 12 < len(city_upper) <= 24 and " " in city_upper:
         words = city_upper.split()
         mid = len(words) // 2
@@ -343,7 +340,7 @@ def create_pdf(text, city, lang_code="IT"):
     strings = LANGUAGES[lang_code]
     formatted_body = ""
     lines = text.split('\n')
-    
+
     if lines and lines[0].startswith('# '):
         lines = lines[1:]
 
@@ -351,9 +348,9 @@ def create_pdf(text, city, lang_code="IT"):
         line_clean = line.strip()
         if not line_clean:
             continue
-            
+
         line_clean = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', line_clean)
-        
+
         # Sostituzioni inline
         heymondo_link = "https://heymondo.it/?utm_medium=Afiliado&utm_source=30SECONDSTOGUIDE&utm_campaign=PRINCIPAL&cod_descuento=30SECONDSTOGUIDE&ag_campaign=GUIDACONTEXT&agencia=JzPWeAXXi7s0b94oPYh2FmTwaWKFpiCp1a8PkqOn&redirect=TEMPORAL"
         heymondo_html = f"<a href='{heymondo_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Heymondo</a>"
@@ -362,13 +359,13 @@ def create_pdf(text, city, lang_code="IT"):
         saily_link = "https://go.saily.site/aff_c?offer_id=101&aff_id=13541&source=GUIDATEXT"
         saily_html = f"<a href='{saily_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Saily</a>"
         line_clean = re.sub(r'\bSaily\b', saily_html, line_clean, flags=re.IGNORECASE)
-        
+
         line_clean = inject_gyg_links(line_clean, city_clean)
-        
+
         if line_clean.startswith('## '):
             title = line_clean.replace('## ', '')
             formatted_body += f"<h2 class='h2-title'>{title}</h2>"
-            
+
             # Iniezione box dinamici
             if any(x in title.upper() for x in ["DORMIRE", "SLEEP", "HOTEL"]):
                 formatted_body += f"""
@@ -405,7 +402,7 @@ def create_pdf(text, city, lang_code="IT"):
                     <a href="{ESIM_LINK}" class="service-cta">INTERNE<span class="last-letter-dot">T</span></a>
                     <div class="service-sub">eSim internazionale Saily.</div>
                 </div>"""
-                
+
         elif line_clean.startswith('### '):
             title = line_clean.replace('### ', '')
             formatted_body += f"<h3 class='h3-title'>{title}</h3>"
@@ -635,7 +632,7 @@ def create_wizard_pdf(text, destination, meta_data, lang_code="IT"):
         clean_line = clean_text_for_pdf(line.strip())
         if not clean_line:
             continue
-        
+
         # Sostituzioni dirette partner come da frontend
         heymondo_link = "https://heymondo.it/?utm_medium=Afiliado&utm_source=30SECONDSTOGUIDE&utm_campaign=PRINCIPAL&cod_descuento=30SECONDSTOGUIDE&ag_campaign=WIZARDCONTEXT&agencia=JzPWeAXXi7s0b94oPYh2FmTwaWKFpiCp1a8PkqOn&redirect=TEMPORAL"
         heymondo_html = f"<a href='{heymondo_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Heymondo</a>"
@@ -644,7 +641,7 @@ def create_wizard_pdf(text, destination, meta_data, lang_code="IT"):
         kiwi_link = "https://kiwi.tpx.lt/k6iWGXOK"
         kiwi_html = f"<a href='{kiwi_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Kiwi</a>"
         clean_line = re.sub(r'\bKiwi(?:\.com)?\b', kiwi_html, clean_line, flags=re.IGNORECASE)
-        
+
         saily_link = "https://go.saily.site/aff_c?offer_id=101&aff_id=13541&source=WIZARDTEXT"
         saily_html = f"<a href='{saily_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>Saily</a>"
         clean_line = re.sub(r'\bSaily\b', saily_html, clean_line, flags=re.IGNORECASE)
@@ -652,10 +649,10 @@ def create_wizard_pdf(text, destination, meta_data, lang_code="IT"):
         treno_link = "https://clk.tradedoubler.com/click?a(3480952)p(376991)ttid(13)url(https://www.thetrainline.com/it/porta-un-amico?situation=td-it&utm_source=td-it)"
         treno_html = f"<a href='{treno_link}' style='color:#e67e22; font-weight:bold; text-decoration:underline;'>treno</a>"
         clean_line = re.sub(r'\btreno\b', treno_html, clean_line, flags=re.IGNORECASE)
-        
+
         clean_line = inject_gyg_links(clean_line, destination)
         line_upper = clean_line.upper()
-        
+
         # Logica iniezione annunci
         if f"{TRIGGER_CH} 2" in line_upper and not inserted_ch1:
             formatted_body += make_html_box(FLIGHT_LINK, "FLIGHTS", ui.get("ad_flight", "").format(month=month_clean))
@@ -856,7 +853,8 @@ def genera_standard():
 
     try:
         today_str = datetime.now().strftime("%d/%m/%Y")
-                
+        model = genai.GenerativeModel("gemini-2.5-flash")
+
         if lang_code == "IT":
             sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate per:"
             base_prompt = TESTO_MODELLO_IT
@@ -880,7 +878,7 @@ def genera_standard():
             6. If a word or phrase is entered that is not a geographical place, answer jokingly but synthetically, do not use the guide structure.
             7. When you suggest a specific excursion, attraction, tour, or museum, ONLY IF YOU ARE REASONABLY SURE IT CAN BE BOOKED VIA GETYOURGUIDE, you MUST enclose the name EXACTLY in this tag: [TOUR: Attraction Name]. Example: I recommend visiting the [TOUR: Colosseum].
             """
-        
+
         full_prompt = f"""
         {sys_instruct} {city_name}.
         
@@ -893,26 +891,23 @@ def genera_standard():
         MODEL:
         {base_prompt}
         """
-        
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", 
-            contents=full_prompt
-        )
+
+        response = model.generate_content(full_prompt)
         markdown_content = response.text
-        
+
         pdf_bytes = create_pdf(markdown_content, city_name, lang_code)
-        
+
         timestamp = datetime.now().strftime("%d/%m %H:%M")
         # Array di 9 elementi per allineamento colonne
         log_to_sheets([timestamp, city_clean, "GUIDE_ONLY", "-", "-", "-", "-", "IT", "-"])
-        
+
         return send_file(
             io.BytesIO(pdf_bytes),
             mimetype='application/pdf',
             as_attachment=True,
             download_name=f"Guide_{city_clean.replace(' ', '_')}.pdf"
         )
-        
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -958,7 +953,8 @@ def genera_pdf():
         if kids > 0:
             pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
 
-        
+        model = genai.GenerativeModel("gemini-2.5-flash")
+
         if lang_code == "IT":
             sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA DI OGGI, CHE E' {today_str}, RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
             rules_lang = "Usa SOLO l'alfabeto Latino/Italiano. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colosseo]."
@@ -1019,11 +1015,8 @@ def genera_pdf():
         STRUTTURA TITOLI (Usa ESATTAMENTE questi):
         {structure}
         """
-        
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", 
-            contents=prompt
-        )
+
+        response = model.generate_content(prompt)
         markdown_content = response.text
 
         meta_data = {
@@ -1032,21 +1025,21 @@ def genera_pdf():
             "budget": f"EUR {budget}",
             "month_name": mese_partenza
         }
-        
+
         pdf_bytes = create_wizard_pdf(markdown_content, destination, meta_data, lang_code)
-        
+
         timestamp = datetime.now().strftime("%d/%m %H:%M")
         ages_str = ", ".join(map(str, kids_ages)) if kids > 0 else "-"
         # Array di 9 elementi per allineamento colonne
         log_to_sheets([timestamp, city_clean, budget, duration_check, adults, kids, ages_str, "IT", origin])
-        
+
         return send_file(
             io.BytesIO(pdf_bytes),
             mimetype='application/pdf',
             as_attachment=True,
             download_name=f"Itinerary_{city_clean.replace(' ', '_')}.pdf"
         )
-        
+
     except Exception as e:
         print(f"Errore Wizard: {e}")
         return jsonify({"error": str(e)}), 500
