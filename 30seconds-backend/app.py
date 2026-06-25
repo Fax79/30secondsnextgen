@@ -84,7 +84,7 @@ def log_to_sheets(data):
 from google.oauth2 import service_account
 
 # --- CONFIGURAZIONE API VERTEX AI ---
-api_json_str = os.getenv("GOOGLE_API_KEY")
+api_json_str = os.getenv("VERTEX_CREDENTIALS_JSON")
 
 if api_json_str:
     try:
