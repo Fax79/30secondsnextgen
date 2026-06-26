@@ -6,3 +6,4 @@ WeasyPrint
 gspread
 oauth2client
 PyJWT
+gunicorn
