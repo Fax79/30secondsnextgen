@@ -84,25 +84,13 @@ def log_to_sheets(data):
 from google.oauth2 import service_account
 
 # --- CONFIGURAZIONE API VERTEX AI ---
-api_json_str = os.getenv("VERTEX_CREDENTIALS_JSON")
+project_id = "persistenza-dati-guide"
 
-if api_json_str:
-    try:
-        api_data = json.loads(api_json_str)
-        if "private_key" in api_data:
-            api_data["private_key"] = api_data["private_key"].replace("\\n", "\n")
-            credentials = service_account.Credentials.from_service_account_info(api_data)
-            
-            # Inizializzazione Vertex AI
-            vertexai.init(
-                project=api_data["project_id"], 
-                location="us-central1", 
-                credentials=credentials
-            )
-        else:
-            print("ERRORE VERTEX AI: Il JSON non contiene 'private_key'.", flush=True)
-    except Exception as e:
-        print(f"ERRORE VERTEX AI CONFIGURAZIONE: {e}", flush=True)
+try:
+    vertexai.init(project=project_id, location="us-central1")
+    print("VERTEX AI SUCCESS: Inizializzato nativamente.", flush=True)
+except Exception as e:
+    print(f"ERRORE VERTEX AI CONFIGURAZIONE: {e}", flush=True)
 
 # ==========================================
 # LINK TRACCIATI
