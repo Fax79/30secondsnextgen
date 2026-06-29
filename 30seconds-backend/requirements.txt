@@ -1,0 +1,8 @@
+Flask
+Flask-Cors
+python-dotenv
+google-generativeai
+WeasyPrint
+gspread
+oauth2client
+PyJWT
