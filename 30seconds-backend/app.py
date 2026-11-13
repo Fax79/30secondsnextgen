@@ -853,7 +853,7 @@ def genera_standard():
 
     try:
         today_str = datetime.now().strftime("%d/%m/%Y")
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-3.8-flash")
         
         if lang_code == "IT":
             sys_instruct = "Sei uno scrittore di viaggi esperto (stile Lonely Planet/National Geographic). Scrivi una guida DETTAGLIATA e con le informazioni più aggiornate per:"
@@ -953,7 +953,7 @@ def genera_pdf():
         if kids > 0:
             pax_desc += f", {kids} {ui.get('pax_kids', 'Ragazzi')} ({', '.join(map(str, kids_ages))})"
 
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-3.8-flash")
 
         if lang_code == "IT":
             sys_prompt = "Agisci come un Travel Planner Senior. Non pianifichi solo un viaggio, pianifichi un viaggio su misura che massimizza il valore del budget. ATTENZIONE ALLA COERENZA CON LA DATA DI OGGI, CHE E' {today_str}, RISPETTO AI SUGGERIMENTI CHE DAI (es. se il volo è tra un mese non sugggerire di prenotare 6 mesi prima o monitorare i voli 24 mesi prima)."
