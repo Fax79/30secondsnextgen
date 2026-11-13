@@ -862,7 +862,7 @@ def genera_standard():
             1. NON USARE MAI TABELLE MARKDOWN (niente righe con | |).
             2. Se devi fare un confronto, usa elenchi puntati descrittivi.
             3. Usa ESATTAMENTE la struttura seguente.
-            4. Scrivi paragrafi ricchi e lunghi.
+            4. Scrivi paragrafi ricchi e lunghi. Fai iniziare i capitoli 5, 6, 7, 8, 9, 10 e 11 con un breve paragrafo introduttivo di 3-4 righe prima dell'elenco puntato.
             5. USA intelligentemente il grassetto markdown (**) e mai l'asterisco singolo (*).
             6. CONTESTO TEMPORALE: Hai l'obbligo di utilizzare le informazioni macroeconomiche e geopolitiche aggiornate alla data di oggi (es. Verifica accuratamente i recenti ingressi nell'Eurozona, la documentazione necessaria all'ingresso nel paese, ecc).
             7. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Questo in particolare nelle sezioni 5, 9 e 10. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
