@@ -863,8 +863,9 @@ def genera_standard():
             2. Se devi fare un confronto, usa elenchi puntati descrittivi.
             3. Usa ESATTAMENTE la struttura seguente.
             4. Scrivi paragrafi ricchi e lunghi.
-            5. CONTESTO TEMPORALE: Hai l'obbligo di utilizzare le informazioni macroeconomiche e geopolitiche aggiornate alla data di oggi (es. Verifica accuratamente i recenti ingressi nell'Eurozona, la documentazione necessaria all'ingresso nel paese, ecc).
-            6. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
+            5. USA intelligentemente il grassetto markdown (**) e mai l'asterisco singolo (*).
+            6. CONTESTO TEMPORALE: Hai l'obbligo di utilizzare le informazioni macroeconomiche e geopolitiche aggiornate alla data di oggi (es. Verifica accuratamente i recenti ingressi nell'Eurozona, la documentazione necessaria all'ingresso nel paese, ecc).
+            7. Quando suggerisci un'escursione, un'attrazione, un tour o un museo specifico, SOLO E SOLTANTO SE SEI RAGIONEVOLMENTE CERTO CHE SI POSSA PRENOTARE TRAMITE GETYOURGUIDE ALLORA devi racchiudere il nome ESATTAMENTE in questo tag: [TOUR: Nome Attrazione]. Esempio: Ti consiglio di visitare il [TOUR: Colusseo].
             """
         else:
             sys_instruct = "You are an expert travel writer (Lonely Planet/National Geographic style). Write a DETAILED guide for:"
